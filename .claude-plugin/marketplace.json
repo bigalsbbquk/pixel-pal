@@ -1,0 +1,5 @@
+{
+  "name": "pixel-pal",
+  "owner": { "name": "bigalsbbquk" },
+  "plugins": [{ "name": "pixel-pal", "source": "./" }]
+}
