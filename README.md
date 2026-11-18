@@ -4,6 +4,8 @@ A small animated character that lives on the main screen of the Claude desktop a
 
 It has 40 actions. Each plays for 5 seconds, then it goes back to idle unless something new happens.
 
+![All 40 actions](docs/actions.png)
+
 ## What triggers what
 
 | Trigger | Actions |
