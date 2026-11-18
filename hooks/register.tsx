@@ -16,6 +16,13 @@ const CSS = `
 @keyframes bob{50%{transform:translateY(-4px)}}
 @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
 
+
+/* dodge: cursor over the zone -> run left, stay away until the cursor leaves */
+.dodge{transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.zone{fill:transparent;pointer-events:all}
+.zone:hover~.dodge{transform:translate(-300px,0)}
+.zone:hover~.dodge .legl{animation:step .15s infinite}.zone:hover~.dodge .legr{animation:step .15s infinite reverse}
+
 /* idle: a 36s routine - stand, stroll left, nap, stroll back, stretch, hop */
 .m-idle .pal{animation:wander 36s ease-in-out infinite}
 .m-idle .legl{animation:step .5s infinite}.m-idle .legr{animation:step .5s infinite reverse}
@@ -133,9 +140,10 @@ const GEN_SVG =
     .map(([n, [e]]) => `<g class="pp p-${n}"><text x="140" y="75" font-size="38">${e}</text></g>`)
     .join('') + `<g class="pp p-whistle"><text x="130" y="40" font-size="34">♪</text></g>`
 
-const scene = (m: Mood) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" preserveAspectRatio="xMaxYMax slice" class="m-${m}">
+const scene = (m: Mood) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="800 190 400 150" preserveAspectRatio="xMaxYMax meet" class="m-${m}">
 <style>${CSS}${GEN_CSS}</style>
-<g transform="translate(1130 233) scale(0.25)">
+<rect class="zone" x="1040" y="190" width="160" height="150"/>
+<g class="dodge"><g transform="translate(1130 233) scale(0.25)">
  <g class="pal">
   <g class="body">
    <rect class="o" x="0" y="40" width="130" height="90" rx="8"/>
@@ -167,6 +175,7 @@ const scene = (m: Mood) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0
   <text class="bolt" x="-30" y="40" font-size="44">⚡</text><text class="bolt" x="140" y="40" font-size="44">⚡</text>
   <text class="spark" x="-20" y="20" font-size="40">✨</text><text class="spark" x="130" y="10" font-size="40">✨</text>
  </g>
+</g>
 </g>
 </svg>`
 
@@ -232,7 +241,6 @@ async function setMood($: any, m: Mood) {
 
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
-    await $.theme.set({ backdrop: { scene: 'pixel-pal', glass: false } })
     const hour = new Date(await $.clock.now()).getHours()
     await setMood($, hour >= 23 || hour < 5 ? 'sleepy' : 'wave')
     return next(e)
@@ -262,9 +270,14 @@ export const register: Register = on => {
     return next(e)
   })
 
-  on('ui.render', { component: 'Backdrop' }, async ($, e, next) => {
+  // lives in the main window's prompt band, so side panes can't cover it
+  on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     if (e.surface !== 'desktop' && e.surface !== 'mobile') return next(e)
-    const { Svg } = $.ui.resolve(e)
-    return <Svg source={scene(await read($, mood))} alt="A little Claude character" isInteractive />
+    const { Box, Svg } = $.ui.resolve(e)
+    return (
+      <Box justifyContent="flex-end">
+        <Svg source={scene(await read($, mood))} alt="A little Claude character" width={300} height={112} isInteractive />
+      </Box>
+    )
   })
 }

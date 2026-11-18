@@ -1,6 +1,6 @@
 {
   "name": "pixel-pal",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A small animated Claude character on the desktop app's main screen that idles, naps and strolls, and reacts to what Claude is doing: typing, reading, searching, running commands, cheering when a turn ends.",
   "license": "MIT",
   "types": "./types/index.d.ts"
